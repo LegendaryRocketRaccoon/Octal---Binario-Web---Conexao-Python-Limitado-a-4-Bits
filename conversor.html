@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversor Octal ↔ Binário (C + Web)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a4b5e 0%, #1a7a8a 50%, #2aa3b8 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0a4b5e 0%, #1a7a8a 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            background: #e0f2f7;
+            border: 2px solid #2aa3b8;
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: center;
+            font-weight: bold;
+            color: #0a4b5e;
+            transition: all 0.3s ease;
+        }
+
+        .tab:hover {
+            background: #b3e5f0;
+            transform: translateY(-2px);
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #1a7a8a 0%, #2aa3b8 100%);
+            color: white;
+            border-color: #1a7a8a;
+        }
+
+        .conversion-panel {
+            display: none;
+        }
+
+        .conversion-panel.active {
+            display: block;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #0a4b5e;
+            font-size: 1.1em;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            border: 2px solid #2aa3b8;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-family: 'Courier New', monospace;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #1a7a8a;
+            box-shadow: 0 0 10px rgba(42, 163, 184, 0.3);
+        }
+
+        .btn-convert {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #1a7a8a 0%, #2aa3b8 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .btn-convert:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(26, 122, 138, 0.4);
+        }
+
+        .btn-convert:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #1a7a8a;
+            margin: 20px 0;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #e0f2f7;
+            border-top: 3px solid #1a7a8a;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result-box {
+            background: linear-gradient(135deg, #e0f2f7 0%, #b3e5f0 100%);
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 5px solid #1a7a8a;
+            display: none;
+        }
+
+        .result-box.show {
+            display: block;
+            animation: slideIn 0.4s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-box h3 {
+            color: #0a4b5e;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .result-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .result-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .result-label {
+            font-weight: bold;
+            color: #1a7a8a;
+        }
+
+        .result-value {
+            color: #0a4b5e;
+            font-size: 1.1em;
+            word-break: break-all;
+        }
+
+        .error-box {
+            background: #ffe0e0;
+            border-left: 5px solid #d32f2f;
+            padding: 15px;
+            border-radius: 8px;
+            color: #d32f2f;
+            display: none;
+            margin-bottom: 20px;
+        }
+
+        .error-box.show {
+            display: block;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .info-box {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            color: #856404;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔢 Conversor de Bases</h1>
+            <p>Octal ↔ Binário</p>
+            <div class="badge">C + Python + HTML</div>
+        </div>
+
+        <div class="content">
+            <div class="info-box">
+                Este conversor usa o programa em C rodando no servidor
+            </div>
+
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('octal-binario')">
+                    Octal → Binário
+                </div>
+                <div class="tab" onclick="switchTab('binario-octal')">
+                    Binário → Octal
+                </div>
+            </div>
+
+
+            <div id="octal-binario" class="conversion-panel active">
+                <div class="input-group">
+                    <label for="input-octal">Digite o número em Octal:</label>
+                    <input type="text" id="input-octal" placeholder="Exemplo: 755" maxlength="50">
+                </div>
+
+                <button class="btn-convert" onclick="converterOctalBinario()" id="btn-octal">
+                    Converter para Binário (usando C)
+                </button>
+
+                <div class="loading" id="loading-octal">
+                    <div class="spinner"></div>
+                    <p>Executando programa C...</p>
+                </div>
+
+                <div id="error-octal" class="error-box"></div>
+                <div id="result-octal" class="result-box"></div>
+            </div>
+
+
+            <div id="binario-octal" class="conversion-panel">
+                <div class="input-group">
+                    <label for="input-binario">Digite o número em Binário:</label>
+                    <input type="text" id="input-binario" placeholder="Exemplo: 110101" maxlength="100">
+                </div>
+
+                <button class="btn-convert" onclick="converterBinarioOctal()" id="btn-binario">
+                    Converter para Octal (usando C)
+                </button>
+
+                <div class="loading" id="loading-binario">
+                    <div class="spinner"></div>
+                    <p>Executando programa C...</p>
+                </div>
+
+                <div id="error-binario" class="error-box"></div>
+                <div id="result-binario" class="result-box"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5000';
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            document.querySelectorAll('.conversion-panel').forEach(panel => {
+                panel.classList.remove('active');
+            });
+
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+
+            limparResultados();
+        }
+
+        function limparResultados() {
+            document.querySelectorAll('.result-box, .error-box, .loading').forEach(el => {
+                el.classList.remove('show');
+            });
+        }
+
+        function formatarBinario(binario) {
+            let formatado = '';
+            for (let i = 0; i < binario.length; i++) {
+                if (i > 0 && i % 4 === 0) {
+                    formatado += ' ';
+                }
+                formatado += binario[i];
+            }
+            return formatado;
+        }
+
+        async function converterOctalBinario() {
+            const input = document.getElementById('input-octal').value.trim();
+            const errorBox = document.getElementById('error-octal');
+            const resultBox = document.getElementById('result-octal');
+            const loadingBox = document.getElementById('loading-octal');
+            const btn = document.getElementById('btn-octal');
+
+            limparResultados();
+
+            if (!input) {
+                errorBox.textContent = '❌ Por favor, digite um número.';
+                errorBox.classList.add('show');
+                return;
+            }
+
+
+            loadingBox.classList.add('show');
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_URL}/converter`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        numero: input,
+                        tipo: '1'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.erro) {
+                    errorBox.textContent = '❌ ' + data.erro;
+                    errorBox.classList.add('show');
+                } else {
+                    const binarioFormatado = formatarBinario(data.binario);
+                    
+                    resultBox.innerHTML = `
+                        <h3>✅ Resultado da Conversão (via C)</h3>
+                        <div class="result-item">
+                            <span class="result-label">Octal:</span>
+                            <span class="result-value">${data.octal}</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Decimal:</span>
+                            <span class="result-value">${data.decimal}</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Binário:</span>
+                            <span class="result-value">${data.binario}</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Formatado:</span>
+                            <span class="result-value">${binarioFormatado}</span>
+                        </div>
+                    `;
+                    resultBox.classList.add('show');
+                }
+            } catch (error) {
+                errorBox.textContent = '❌ Erro ao conectar com o servidor. Certifique-se de que o servidor Python está rodando.';
+                errorBox.classList.add('show');
+            } finally {
+                loadingBox.classList.remove('show');
+                btn.disabled = false;
+            }
+        }
+
+        async function converterBinarioOctal() {
+            const input = document.getElementById('input-binario').value.trim();
+            const errorBox = document.getElementById('error-binario');
+            const resultBox = document.getElementById('result-binario');
+            const loadingBox = document.getElementById('loading-binario');
+            const btn = document.getElementById('btn-binario');
+
+            limparResultados();
+
+            if (!input) {
+                errorBox.textContent = '❌ Por favor, digite um número.';
+                errorBox.classList.add('show');
+                return;
+            }
+
+            loadingBox.classList.add('show');
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_URL}/converter`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        numero: input,
+                        tipo: '2'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.erro) {
+                    errorBox.textContent = '❌ ' + data.erro;
+                    errorBox.classList.add('show');
+                } else {
+                    const binarioFormatado = formatarBinario(data.binario);
+                    
+                    resultBox.innerHTML = `
+                        <h3>✅ Resultado da Conversão (via C)</h3>
+                        <div class="result-item">
+                            <span class="result-label">Binário:</span>
+                            <span class="result-value">${data.binario}</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Formatado:</span>
+                            <span class="result-value">${binarioFormatado}</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Decimal:</span>
+                            <span class="result-value">${data.decimal}</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Octal:</span>
+                            <span class="result-value">${data.octal}</span>
+                        </div>
+                    `;
+                    resultBox.classList.add('show');
+                }
+            } catch (error) {
+                errorBox.textContent = '❌ Erro ao conectar com o servidor. Certifique-se de que o servidor Python está rodando.';
+                errorBox.classList.add('show');
+            } finally {
+                loadingBox.classList.remove('show');
+                btn.disabled = false;
+            }
+        }
+
+
+        document.getElementById('input-octal').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                converterOctalBinario();
+            }
+        });
+
+        document.getElementById('input-binario').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                converterBinarioOctal();
+            }
+        });
+    </script>
+</body>
+</html>
