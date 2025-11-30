@@ -21,3 +21,8 @@ Teste exemplo: ./conversor 1 755
 Iniciar o servidor python: servidor.py
 
 Depois acessar o localhost que será gerado.
+
+
+Versão não Limitada a 4 Bits:
+
+https://github.com/LegendaryRocketRaccoon/Octal---Binario-Web---Conexao-Python
