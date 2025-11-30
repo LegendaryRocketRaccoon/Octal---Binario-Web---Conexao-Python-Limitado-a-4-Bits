@@ -20,4 +20,4 @@ Teste exemplo: ./conversor 1 755
 
 Iniciar o servidor python: servidor.py
 
-Depois acessar o http://localhost:5000 que será gerado.
+Depois acessar o localhost que será gerado.
